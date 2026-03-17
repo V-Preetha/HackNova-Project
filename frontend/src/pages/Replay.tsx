@@ -107,9 +107,9 @@ export default function Replay() {
         <div style={{ padding: 14, border: "1px solid #e5e7eb", borderRadius: 12 }}>
           <div style={{ fontWeight: 900, marginBottom: 10 }}>Decision trace</div>
           <ol style={{ margin: 0, paddingLeft: 18, color: "#111827" }}>
-            {decisionTrace.map((s, idx) => (
+            {decisionTrace.map((s: any, idx) => (
               <li key={idx} style={{ marginBottom: 6 }}>
-                {s.step}
+                {typeof s === "string" ? s : s?.step}
               </li>
             ))}
           </ol>

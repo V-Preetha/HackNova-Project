@@ -36,6 +36,8 @@ class InferenceResult:
     confidence: float
     logits: list[float]
     probs: list[float]
+    labels: list[str]
+    pred_idx: int
 
 
 class InferenceEngine:
@@ -158,7 +160,14 @@ class InferenceEngine:
             label_list = list(labels) if labels is not None else default_labels
             prediction = label_list[pred_idx] if pred_idx < len(label_list) else str(pred_idx)
             confidence = probs[pred_idx]
-            return InferenceResult(prediction=prediction, confidence=confidence, logits=logits, probs=probs)
+            return InferenceResult(
+                prediction=prediction,
+                confidence=confidence,
+                logits=logits,
+                probs=probs,
+                labels=label_list,
+                pred_idx=pred_idx,
+            )
 
         # Multi-class
         probs_t = torch.softmax(logits_t, dim=0)
@@ -179,5 +188,12 @@ class InferenceEngine:
         if math.isnan(confidence):
             confidence = 0.0
 
-        return InferenceResult(prediction=prediction, confidence=confidence, logits=logits, probs=probs)
+        return InferenceResult(
+            prediction=prediction,
+            confidence=confidence,
+            logits=logits,
+            probs=probs,
+            labels=label_list,
+            pred_idx=pred_idx,
+        )
 

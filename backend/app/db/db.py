@@ -63,7 +63,7 @@ class Database:
         tampering_flag: bool,
         trust_score: int,
         risk_level: str,
-        decision_trace: list[dict[str, Any]],
+        decision_trace: list[Any],
         introspection: dict[str, Any],
     ) -> None:
         created_at = utc_now_iso()

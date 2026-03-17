@@ -15,9 +15,9 @@ class StabilityResult:
     perturbed_probs: list[float]
 
 
-def _add_gaussian_noise(img: Image.Image, std: float) -> Image.Image:
+def _add_gaussian_noise(img: Image.Image, std: float, rng: np.random.Generator) -> Image.Image:
     arr = np.array(img).astype(np.float32) / 255.0
-    noise = np.random.normal(0.0, std, size=arr.shape).astype(np.float32)
+    noise = rng.normal(0.0, std, size=arr.shape).astype(np.float32)
     out = np.clip(arr + noise, 0.0, 1.0)
     return Image.fromarray((out * 255.0).astype(np.uint8))
 
@@ -26,9 +26,9 @@ def _rotate(img: Image.Image, degrees: float) -> Image.Image:
     return img.rotate(degrees, resample=Image.BILINEAR, expand=False)
 
 
-def _brightness(img: Image.Image, delta: float) -> Image.Image:
+def _brightness(img: Image.Image, delta: float, rng: np.random.Generator) -> Image.Image:
     # factor in [1-delta, 1+delta]
-    factor = float(1.0 + np.random.uniform(-delta, delta))
+    factor = float(1.0 + rng.uniform(-delta, delta))
     return ImageEnhance.Brightness(img).enhance(factor)
 
 
@@ -50,16 +50,17 @@ def build_perturbations(
     noise_std: float,
     rotation_degrees: float,
     brightness_delta: float,
-) -> list[Image.Image]:
-    out: list[Image.Image] = []
+    rng: np.random.Generator,
+) -> list[tuple[str, Image.Image]]:
+    out: list[tuple[str, Image.Image]] = []
     for i in range(max(0, int(runs))):
         choice = i % 3
         if choice == 0:
-            out.append(_add_gaussian_noise(img, noise_std))
+            out.append(("gaussian_noise", _add_gaussian_noise(img, noise_std, rng)))
         elif choice == 1:
-            deg = float(np.random.uniform(-rotation_degrees, rotation_degrees))
-            out.append(_rotate(img, deg))
+            deg = float(rng.uniform(-rotation_degrees, rotation_degrees))
+            out.append(("rotation", _rotate(img, deg)))
         else:
-            out.append(_brightness(img, brightness_delta))
+            out.append(("brightness", _brightness(img, brightness_delta, rng)))
     return out
 

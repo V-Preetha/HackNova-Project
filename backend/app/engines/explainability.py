@@ -16,6 +16,72 @@ class HeatmapResult:
     overlay_path: str
 
 
+def focus_regions_from_cam(
+    cam_01: np.ndarray,
+    *,
+    top_k: int = 3,
+    peak_suppression: float = 0.15,
+    box_radius: float = 0.18,
+) -> list[dict[str, Any]]:
+    """
+    Derive focus regions from the *real* activation map.
+    We do not attempt anatomical naming. Regions are peak-centered boxes in normalized coordinates.
+    """
+    if cam_01.ndim != 2:
+        cam = cam_01.squeeze()
+    else:
+        cam = cam_01
+    cam = cam.astype(np.float32)
+    h, w = cam.shape
+    if h <= 1 or w <= 1:
+        return []
+
+    work = cam.copy()
+    regions: list[dict[str, Any]] = []
+    for i in range(max(0, int(top_k))):
+        idx = int(np.argmax(work))
+        y, x = divmod(idx, w)
+        peak = float(work[y, x])
+        if peak <= 1e-6:
+            break
+
+        # Box around peak (normalized)
+        rx = max(1, int(round(box_radius * w)))
+        ry = max(1, int(round(box_radius * h)))
+        x0 = max(0, x - rx)
+        x1 = min(w - 1, x + rx)
+        y0 = max(0, y - ry)
+        y1 = min(h - 1, y + ry)
+
+        patch = cam[y0 : y1 + 1, x0 : x1 + 1]
+        importance = float(np.mean(patch)) if patch.size else peak
+
+        regions.append(
+            {
+                "region": f"focus_{i+1}",
+                "importance": float(max(0.0, min(1.0, importance))),
+                "bbox_norm": {
+                    "x0": float(x0 / (w - 1)),
+                    "y0": float(y0 / (h - 1)),
+                    "x1": float(x1 / (w - 1)),
+                    "y1": float(y1 / (h - 1)),
+                },
+                "peak_norm": {"x": float(x / (w - 1)), "y": float(y / (h - 1)), "value": peak},
+            }
+        )
+
+        # Suppress around peak so next region is different
+        sx = max(1, int(round(peak_suppression * w)))
+        sy = max(1, int(round(peak_suppression * h)))
+        sx0 = max(0, x - sx)
+        sx1 = min(w - 1, x + sx)
+        sy0 = max(0, y - sy)
+        sy1 = min(h - 1, y + sy)
+        work[sy0 : sy1 + 1, sx0 : sx1 + 1] = 0.0
+
+    return regions
+
+
 def _find_last_conv(model: nn.Module) -> nn.Module:
     last = None
     for m in model.modules():

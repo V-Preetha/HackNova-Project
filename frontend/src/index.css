@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-gray-200 font-sans antialiased m-0 p-0;
+  }
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-surface/80 backdrop-blur-md border border-border rounded-xl;
+  }
+  
+  .glow-text {
+    @apply text-primary drop-shadow-[0_0_8px_rgba(0,255,136,0.6)];
+  }
+
+  /* Custom styling to match MedTrace design */
+  .medtrace-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .medtrace-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .medtrace-scrollbar::-webkit-scrollbar-thumb {
+    background: #1f2937;
+    border-radius: 4px;
+  }
+  .medtrace-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #374151;
+  }
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(300%); }
+}

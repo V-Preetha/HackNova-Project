@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.vite/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.env
+
+# Ignore uploaded and generated images but keep the directories
+data/heatmaps/*.png
+data/heatmaps/*.jpg
+data/uploads/*.png
+data/uploads/*.jpg
+
+# OS generated files
+.DS_Store
+Thumbs.db

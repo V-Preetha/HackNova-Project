@@ -1,37 +1,31 @@
-import { Link, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout";
 import Analyze from "./pages/Analyze";
 import Logs from "./pages/Logs";
 import Replay from "./pages/Replay";
-
-const Nav = () => {
-  return (
-    <div style={{ display: "flex", gap: 12, padding: 16, borderBottom: "1px solid #e5e7eb" }}>
-      <Link to="/" style={{ fontWeight: 700, textDecoration: "none" }}>
-        MedTrace
-      </Link>
-      <div style={{ flex: 1 }} />
-      <Link to="/" style={{ textDecoration: "none" }}>
-        Analyze
-      </Link>
-      <Link to="/logs" style={{ textDecoration: "none" }}>
-        Logs
-      </Link>
-    </div>
-  );
-};
+import Dashboard from "./pages/Dashboard";
+import Safety from "./pages/Safety";
+import Trust from "./pages/Trust";
+import History from "./pages/History";
+import Introspection from "./pages/Introspection";
+import { AnalysisProvider } from "./context/AnalysisContext";
 
 export default function App() {
   return (
-    <div style={{ fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, sans-serif" }}>
-      <Nav />
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: 16 }}>
+    <AnalysisProvider>
+      <Layout>
         <Routes>
-          <Route path="/" element={<Analyze />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/analysis" element={<Analyze />} />
+          <Route path="/safety" element={<Safety />} />
+          <Route path="/trust" element={<Trust />} />
           <Route path="/logs" element={<Logs />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/introspection" element={<Introspection />} />
           <Route path="/replay/:id" element={<Replay />} />
         </Routes>
-      </div>
-    </div>
+      </Layout>
+    </AnalysisProvider>
   );
 }
 
